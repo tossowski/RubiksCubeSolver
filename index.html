@@ -4,6 +4,9 @@
 		<meta charset="utf-8">
 		<title>Rubix Cube</title>
 		<link rel="stylesheet" href="style.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500&display=swap" rel="stylesheet">
 	</head>
 	<body>
 		<script src="https://threejs.org/build/three.min.js"></script>
@@ -13,12 +16,38 @@
 		<script type="module" src="animation.js"></script>
 		<script type="module" src="main.js"></script>
 
-		<div class="buttonContainer">
-			<button id="scramble">Scramble</button>
-			<button id="solve">Solve</button>
-			<button id="reset">Reset</button>
-			<button id="resetCamera">Reset Camera</button>
+		<div class="imageContainer">
+			<img id="titleImage" src="./images/title.png"/>
 		</div>
+
+		<div id="leftPanel">
+			
+			<div class="buttonContainer">
+				<button class="style-4" id="scramble">Scramble</button>
+				<button id="solve">Solve</button>
+				<button id="reset">Reset</button>
+				<button id="resetCamera">Reset Camera</button>
+				<div class="slidecontainer">
+					<p class="description">Animation Speed</p>
+					<form class="range">
+						<div class="form-group range__slider">
+							<input type="range" min="1" max="100" value="30" class="slider" id="speed">
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<div id="rightPanel">
+			<div class="textPanel">
+				<p class="description">This is a program written to visualize a 
+					<a href="http://www.chessandpoker.com/rubiks-cube-solution.html">beginner
+						method</a> for solving a Rubik's Cube. The rendering is done using 
+						<a href="https://threejs.org/">three.js</a>, a javascript wrapper around WebGL.
+				</p>
+			</div>
+		</div>
+		
 		
 	</body>
 </html>

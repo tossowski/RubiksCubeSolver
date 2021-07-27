@@ -1,16 +1,28 @@
 import {RubixCube, AXIS, DIRECTION, sides} from './rubix.js';
-import { RotateCubeAnimation, RotateFaceAnimation } from './animation.js';
+import { CubeAnimation, RotateCubeAnimation, RotateFaceAnimation } from './animation.js';
+
+
 
 // Useful Constants
-let speed = 0.4;
+CubeAnimation.animationSpeed = 0.1
+let MIN_SPEED = 0.01;
+let MAX_SPEED = 1;
+let DEFAULT_CAMERA_DISTANCE = 5;
+let DEFAULT_CAMERA_X = 2.5;
 let renderqueue = [];
 let CUBE_DIM = 3;
+let animating = false;
 
 // Scene setup
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({"antialiasing":true});
 const controls = new THREE.OrbitControls( camera, renderer.domElement );
+controls.minDistance = 3;
+controls.maxDistance = 50;
+controls.distance = DEFAULT_CAMERA_DISTANCE;
+
+
 renderer.setSize( window.innerWidth, window.innerHeight );
 scene.background = new THREE.Color( 0x808080 );
 document.body.appendChild( renderer.domElement );
@@ -20,7 +32,7 @@ let sphereGeometry1 = new THREE.SphereBufferGeometry(100, 30, 30);
 
 // Sphere Material 1
 let sphereMaterial1 = new THREE.MeshLambertMaterial({
-	color: 0xfccdd3
+	color: 0xffffff
 });
 
 // Sphere Mesh 1
@@ -29,9 +41,11 @@ sphereMesh1.receiveShadow = true;
 sphereMesh1.position.set(0, 0, 0);
 scene.add(sphereMesh1);
 
+
 // Pivot point
 let pivotPoint = new THREE.Object3D();
 sphereMesh1.add(pivotPoint);
+pivotPoint.position.set(0,0,0);
 
 let rcube = new RubixCube(CUBE_DIM);
 
@@ -46,24 +60,24 @@ const clearCube = function(size) {
 }
 
 const resetCamera = function() {
-	camera.position.z = 5;
-	camera.position.x = 5;
-	camera.position.y = 5;
+	controls.reset();
+	controls.minDistance = 3;
+	controls.maxDistance = 50;
+	controls.distance = DEFAULT_CAMERA_DISTANCE;
+	camera.position.z = DEFAULT_CAMERA_X;
+	camera.position.x = DEFAULT_CAMERA_X;
+	camera.position.y = DEFAULT_CAMERA_X;
 	camera.lookAt(0,0,0);
 }
 
 clearCube(CUBE_DIM);
-
-camera.position.z = 5;
-camera.position.x = 5;
-camera.position.y = 5;
-camera.lookAt(0,0,0);
+resetCamera();
 
 const turn = function(axis, direction, num_turns, index, cube) {
 	if (cube) {
         cube.rotate(axis, direction, num_turns, index);
 	}
-	return new RotateFaceAnimation(rcube, scene, camera, renderer, axis, direction, num_turns, index, pivotPoint, speed)
+	return new RotateFaceAnimation(rcube, scene, camera, renderer, axis, direction, num_turns, index, pivotPoint)
 }
 
 const randomTurn = function(cube) {
@@ -83,7 +97,7 @@ const randomTurn = function(cube) {
         cube.rotate(axis, direction, num_turns, index);
 	}
 	
-	return new RotateFaceAnimation(rcube, scene, camera, renderer, axis, direction, num_turns, index, pivotPoint, speed)
+	return new RotateFaceAnimation(rcube, scene, camera, renderer, axis, direction, num_turns, index, pivotPoint)
 	
 };
 
@@ -94,7 +108,7 @@ const turnEntireCube = function (faceNum, cube) {
 	if (cube) {
         cube.rotateEntireCube(axis, direction, num_turns);
 	}
-	return new RotateCubeAnimation(rcube, scene, camera, renderer, axis, direction, num_turns, pivotPoint, speed)
+	return new RotateCubeAnimation(rcube, scene, camera, renderer, axis, direction, num_turns, pivotPoint)
 
 }
 
@@ -379,7 +393,6 @@ const arrangeLastLayerCorners = function(cube) {
 
 const solveSecondLayer = function(cube) {
 	let moves = [];
-	//speed = 0.1;
 	let potentialCubes = [11, 19, 9, 1, 5, 23, 21, 3];
 	let desired = [11, 19, 9, 1];
 
@@ -725,33 +738,41 @@ const solveCube = function(cube) {
 	return moves;
 }
 
-document.body.onkeyup = function(e){
-    if(e.keyCode == 84){ // t keycode
-		renderqueue = renderqueue.concat(randomTurn());
-    } else if (e.keyCode == 82) {// r keycode 
-		clearCube(3);
-	} else if (e.keyCode == 76) {
-		let rnum = 5;
-		renderqueue = renderqueue.concat(turnEntireCube(rnum));
-	} else if (e.keyCode == 83) {
-		let cube = new RubixCube(3);
-		cube.set_state(rcube.get_state());
-		let solution = solveCube(cube);
-		renderqueue = renderqueue.concat(solution);
-	} else if (e.keyCode == 80) {
-		for (let i = 0; i < 10; i++) {
-			renderqueue = renderqueue.concat(randomTurn());
-		}
-	}
+// document.body.onkeyup = function(e){
+//     if(e.keyCode == 84){ // t keycode
+// 		renderqueue = renderqueue.concat(randomTurn());
+//     } else if (e.keyCode == 82) {// r keycode 
+// 		clearCube(3);
+// 	} else if (e.keyCode == 76) {
+// 		let rnum = Math.floor(Math.random() * 5);
+// 		renderqueue = renderqueue.concat(turnEntireCube(rnum));
+// 	} else if (e.keyCode == 83) {
+// 		let cube = new RubixCube(3);
+// 		cube.set_state(rcube.get_state());
+// 		let solution = solveCube(cube);
+// 		renderqueue = renderqueue.concat(solution);
+// 	} else if (e.keyCode == 80) {
+// 		for (let i = 0; i < 10; i++) {
+// 			renderqueue = renderqueue.concat(randomTurn());
+// 		}
+// 	} else if (e.keyCode == 81) {
+// 		stop_animation();
+// 	}
+// }
+
+function stop_animation() {
+	animating = false;
 }
+
 
 function process_queue() {
 	let idx = 0;
 	if (renderqueue.length > 0) {
 		for (let i = 1; i < renderqueue.length; i++) {
-			renderqueue[idx].set_callback(renderqueue[i]);
+			renderqueue[idx].set_next_animation(renderqueue[i]);
 			idx++;
 		}
+		renderqueue[renderqueue.length - 1].set_callback(stop_animation);
 		renderqueue[0].play();
 		renderqueue = [];
 	}
@@ -773,21 +794,27 @@ function animate() {
 
 animate();
 
+
 function scramble() {
+	if (animating) return;
 	for (let i = 0; i < 20; i++) {
 		renderqueue = renderqueue.concat(randomTurn());
 	}
+	animating = true;
 }
 
 function solve() {
+	if (animating) return;
 	let cube = new RubixCube(3);
 	cube.set_state(rcube.get_state());
 	let solution = solveCube(cube);
-	//console.log(rcube.cubes[0].faceColors, cube.cubes[0].faceColors);
 	renderqueue = renderqueue.concat(solution);
+	animating = true;
+
 }
 
 function reset() {
+	if (animating) return;
 	clearCube(CUBE_DIM);
 }
 
@@ -798,3 +825,29 @@ var buttons = document.getElementsByTagName("button");
 for (let i = 0; i < buttons.length; i++) {
 	buttons[i].addEventListener("click", buttonToHandler[buttons[i].id], false);
 };
+
+const updateSlider = function(slider) {
+	let percentage =  (slider.value - 1) / (99) * 100
+    slider.style = 'background: linear-gradient(to right, #50299c, #7a00ff ' + percentage + '%, #d3edff ' + percentage + '%, #dee1e2 100%)'
+  }
+
+
+var slider = document.getElementById("speed");
+updateSlider(slider);
+
+
+// Update the current slider value (each time you drag the slider handle)
+slider.oninput = function() {
+  	CubeAnimation.animationSpeed = (slider.value - 1) / (99) * (MAX_SPEED - MIN_SPEED) + MIN_SPEED;
+	updateSlider(slider);
+}
+
+
+function onResize() {
+	camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+	renderer.render(scene, camera);
+}
+  
+window.addEventListener('resize', onResize);

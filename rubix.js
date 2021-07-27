@@ -200,7 +200,9 @@ export class RubixCube {
         }
       }
     }
+
   }
+
 
   clone() {
     let cube = new RubixCube(3);
@@ -222,9 +224,9 @@ export class RubixCube {
           face.push(this.cubes[j * inc + i + index * this.dim])
         }
       }
-    }
+    } 
     
-    // let pivotPos = face[(Math.floor(face.length / 2))].position;
+    //console.log(axis, index, face[(Math.floor(face.length / 2))].faceColors);
     return face;
   }
 
