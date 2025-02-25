@@ -1,6 +1,7 @@
+import * as THREE from 'three';
 import {RubixCube, AXIS, DIRECTION, sides} from './rubix.js';
 import { CubeAnimation, RotateCubeAnimation, RotateFaceAnimation } from './animation.js';
-
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 
 // Useful Constants
@@ -17,7 +18,7 @@ let animating = false;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 const renderer = new THREE.WebGLRenderer({"antialiasing":true});
-const controls = new THREE.OrbitControls( camera, renderer.domElement );
+const controls = new OrbitControls( camera, renderer.domElement );
 controls.minDistance = 3;
 controls.maxDistance = 50;
 controls.distance = DEFAULT_CAMERA_DISTANCE;
@@ -28,7 +29,7 @@ scene.background = new THREE.Color( 0x808080 );
 document.body.appendChild( renderer.domElement );
 
 // Sphere Geometry 1
-let sphereGeometry1 = new THREE.SphereBufferGeometry(100, 30, 30);
+let sphereGeometry1 = new THREE.SphereGeometry(100, 30, 30);
 
 // Sphere Material 1
 let sphereMaterial1 = new THREE.MeshLambertMaterial({
